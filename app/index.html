@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Minha Startup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Adicione aqui seu CSS */
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            text-align: center;
+            background-color: #1c1c1c;
+            color: rgb(137, 248, 97)
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-top: 50px;
+        }
+
+        #transcript {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>CONVERSA COM INTELIGÊNCIA ARTIFICIAL</h1>
+    </div>
+
+    <div class="container">
+        <button class="button" id="start-recording-button">RECONHECER VOZ</button>
+        <br>
+        <h1>SUA FALA</h1>
+        <div id="transcript">
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>RESPOSTA OPEN AI</h2>
+        <div id="response-section">
+            <small>
+                ...
+            </small>
+        </div>
+    </div>
+
+    <script>
+        window.SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        const recognition = new SpeechRecognition();
+        recognition.interimResults = true;
+        recognition.lang = "pt-br";
+
+        const startRecordingButton = document.getElementById('start-recording-button');
+        const responseSection = document.getElementById('response-section');
+        let p = document.createElement("p");
+        const transcript = document.querySelector("#transcript");
+        transcript.appendChild(p);
+
+        startRecordingButton.addEventListener('click', (e) => {
+            recognition.start();
+        });
+
+        recognition.addEventListener("result", async (e) => {
+            const transcript = Array.from(e.results)
+                .map((result) => result[0])
+                .map((result) => result.transcript)
+                .join("");
+
+            p.textContent = transcript;
+            responseSection.innerHTML = 'OpenAI está pensando...'
+            if (e.results[0].isFinal) {
+
+                const response = await fetch(`http://localhost:3000/conversar?fala=${transcript}`);
+                const data = await response.json();
+
+                // Exiba a resposta na página
+                responseSection.innerHTML = data.result;
+
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
